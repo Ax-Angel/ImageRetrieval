@@ -43,9 +43,30 @@ for x=1:muestras
         linea = linea + 1;
     end
 end
+%Extraccion de caracteristicas de la imagen 22.tiff
+linea = 1;
+for x=1:muestras
+    for y=1:muestras
+        imgAl = imread('22.tiff');
+        %imgAl = rgb2gray(imgAl);
+        imgAl = imgAl(1*x:32*x,1*y:32*y);
+        imgAl = histeq(imgAl, nivel);
+        cocoM = zeros(nivel);
+        %Feature extraction
+        cocoM = graycomatrix(imgAl, 'offset', [distV,distH]);
+        media = mean(mean(imgAl));
+        stats = graycoprops(cocoM);
+        % Matriz con vectores de caracteristicas
+        vectorP = [media stats.Contrast stats.Correlation stats.Energy stats.Homogeneity];
+        F3(linea,:) = vectorP;
+        L3(linea,:) = '22.tiff';
+        linea = linea + 1;
+    end
+end
 %concatenacion de ambas matrices
-Fr = vertcat(F, F2);
-Lr = vertcat(L, L2);
+Fr = vertcat(F, F2, F3);
+Lr = vertcat(L, L2, L3);
+
 
 %KNN = ClassificationKNN.fit(F, L);
 KNN = NaiveBayes.fit(Fr, Lr);
