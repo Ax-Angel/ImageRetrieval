@@ -63,17 +63,18 @@ for x=1:muestras
         linea = linea + 1;
     end
 end
-%concatenacion de ambas matrices
+%concatenacion de las matrices
 Fr = vertcat(F, F2, F3);
 Lr = vertcat(L, L2, L3);
 
+NB = NaiveBayes.fit(Fr, Lr);
+Mdl = fitcdiscr(Fr, Lr);
+KNN = ClassificationKNN.fit(Fr, Lr);
 
-%KNN = ClassificationKNN.fit(F, L);
-KNN = NaiveBayes.fit(Fr, Lr);
 
 %Clasificador
 
-imgTest = imread('D64.BMP');
+imgTest = imread('D6.bmp');
 imgTest = rgb2gray(imgTest);
 imgTest = imgTest(576:640,576:640);
 imgTest = histeq(imgTest,nivel);
@@ -84,5 +85,6 @@ media = mean(mean(imgTest));
 stats = graycoprops(cocoM);
 %Vector de caracteristicas
 vectorF = [media stats.Contrast stats.Correlation stats.Energy stats.Homogeneity];
-resultado = predict(KNN,vectorF);
-resultado
+resultadoKNN = predict(KNN,vectorF);
+resultadoMdl = predict(Mdl,vectorF);
+resultadoNB = predict(NB,vectorF);
