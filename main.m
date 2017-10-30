@@ -1,4 +1,4 @@
-muestras = 10;
+muestras = 5;
 nivel = 10;
 linea = 1;
 %Para analiss en grados y dstancia
@@ -68,23 +68,55 @@ Fr = vertcat(F, F2, F3);
 Lr = vertcat(L, L2, L3);
 
 NB = NaiveBayes.fit(Fr, Lr);
-Mdl = fitcdiscr(Fr, Lr);
+%Mdl = fitcdiscr(Fr, Lr);
 KNN = ClassificationKNN.fit(Fr, Lr);
 
 
-%Clasificador
+%Set de prueba de D6
 
 imgTest = imread('D6.bmp');
 imgTest = rgb2gray(imgTest);
-imgTest = imgTest(576:640,576:640);
-imgTest = histeq(imgTest,nivel);
-cocoM = zeros(nivel);
-%Feature extraction
-cocoM = graycomatrix(imgTest, 'offset', [distV,distH]);
-media = mean(mean(imgTest));
-stats = graycoprops(cocoM);
-%Vector de caracteristicas
-vectorF = [media stats.Contrast stats.Correlation stats.Energy stats.Homogeneity];
-resultadoKNN = predict(KNN,vectorF);
-resultadoMdl = predict(Mdl,vectorF);
-resultadoNB = predict(NB,vectorF);
+[x,y]=size(imgTest);
+linea=1;
+for i=1:10
+    for j=1:10
+       prueba=imgTest(1*i:64*i, 1*j:64*j);
+       imgTest = histeq(imgTest,nivel);
+       cocoM = graycomatrix(imgTest, 'offset', [distV,distH]);
+       media = mean(mean(imgTest));
+       stats = graycoprops(cocoM);
+       vectorF = [media stats.Contrast stats.Correlation stats.Energy stats.Homogeneity];
+       resultado1KNN(linea,:) = predict(KNN,vectorF);
+       labelsD6(linea,:) = 'D6.bmp ';
+       resultado1NB(linea,:)= predict(NB,vectorF);
+       linea=linea+1;
+    end
+end
+
+%Set de prueba de D64
+
+imgTest = imread('D64.bmp');
+imgTest = rgb2gray(imgTest);
+[x,y]=size(imgTest);
+linea=1;
+for i=1:10
+    for j=1:10
+       prueba=imgTest(1*i:64*i, 1*j:64*j);
+       imgTest = histeq(imgTest,nivel);
+       cocoM = graycomatrix(imgTest, 'offset', [distV,distH]);
+       media = mean(mean(imgTest));
+       stats = graycoprops(cocoM);
+       vectorF = [media stats.Contrast stats.Correlation stats.Energy stats.Homogeneity];
+       resultado2KNN(linea,:) = predict(KNN,vectorF);
+       labelsD64(linea,:) = 'D64.bmp';
+       resultado2NB(linea,:)= predict(NB,vectorF);
+       linea=linea+1;
+    end
+end
+
+truthLabels = vertcat(labelsD6, labelsD64);
+outKNN = vertcat(resultado1KNN, resultado2KNN);
+outNB = vertcat(resultado1NB, resultado2NB);
+
+%Analisis con classperf
+CPKNN = classperf(truthLabels, outKNN);
